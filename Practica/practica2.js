@@ -1,4 +1,4 @@
-class Sube{
+/*class Sube{
     static idGeneral
     #id
     #saldo
@@ -28,7 +28,7 @@ class Sube{
         return puedePagar;
     }
     
-}
+} */
 /* Aca armo la sube como prototipo*/
 
 sube = function(){
@@ -55,6 +55,9 @@ sube.prototype.pagarViaje = function(costoViaje){
     return alcanzaLaPlata
 }
 
+sube.prototype.compararIDs = function(idRecarga){
+    return idRecarga === this.id
+}
 
 
 
@@ -65,16 +68,41 @@ sistemaCentralizado = function(){
     this.tarjetasPendientes = []
 }
 
+Recarga = function(id,monto){
+    this.idTarjeta = id
+    this.monto = monto
+}
+
 sistemaCentralizado.prototype.cargarTarjeta = function(identificadorSube,saldoCargar){
-    this.tarjetasPendientes.push([identificadorSube,saldoCargar])
+    this.recargasPendientes.push(new Recarga(identificadorSube,saldoCargar))
+}
+
+Recarga.prototype.validarId = function(SubeAValidar){
+    return SubeAValidar.compararIDs(this.idTarjeta)
 }
 
 sistemaCentralizado.prototype.acreditarSaldo = function(ObjSube){
-    this.tarjetasPendientes.forEach(carga => {
+    const cargasDeLaTarjeta = this.recargasPendientes
+        .filter(carga => carga.validarId(ObjSube));
+    
+    const saldoTOtalcargar = cargasDeLaTarjeta.reduce((total,carga) => total+carga.monto,0)
+                                                /*TOTAL ES EL ACUMULADOR
+                                                CARGA ES EL ELEMENTO DE LA FUNCION QUE ESTAS LLAMANDO
+                                                ES DECIR DE CARGASDELATARJETA  
+                                                ESTO LO DEFINE ASI .reduce, cada vuelta devuelve total+carga dentro del nuevo array*/
+    ObjSube.cargarSaldo(saldoTOtalcargar)
+    this.recargasPendientes = this.recargasPendientes.filter(carga => !carga.validarId(ObjSube))
+
+}
+
+sistemaCentralizado.prototype.consultarRecargasPendientes = function(ObjSube){
+    let n=0;
+    this.recargasPendientes.forEach(carga => {
         if(carga[0] == ObjSube.id){
-            ObjSube.cargarSaldo(carga[1]);
+            n++;
         }
-    });
+    })
+    console.log(n)
 }
 
 const a = new sube()
